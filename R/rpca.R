@@ -58,8 +58,28 @@ CalcModifiedPCscores <- function(object, loadings, num.sig.genes=30){
   return(pc.sigs)
 }
 
+#' Perform robust PCA (Hubert PCA) with modified PC scores on a Seurat object
+#'
+#' \code{scRobustPCA} performs the variant of robust PCA developed by Mia Hubert
+#' et al. on the gene expression matrix "data" in a Seurat object. Set
+#' reduction.type='rpca' in other Seurat functions to use the rPCA results, for
+#' example to calculate clusters with FindClusters.
+#'
+#' @param object Seurat object
+#' @param npcs Number of principal components to calculate
+#' @param pc.genes Genes as input to PC. If \code{pc.genes==NULL}, the var.genes
+#'   slot is used. If var.genes is empty and \code{pc.genes==NULL}, then all
+#'   genes are used.
+#' @param use.modified.pcscores If \code{FALSE}, then the raw pc score output
+#'   from robust PCA is used. If \code{TRUE}, then pc scores are replaced with
+#'   the sum of the top 30 genes by positive loading minus the sum of the top 30
+#'   genes by negative loading. Each gene is scaled to a max of 1 and min of 0.
+#' @return A Seurat object with the 'rpca' field filled.
+#'
+#' @examples
+#'
 #' @export
-RunRobPCA <- function(object, npcs=10, pc.genes=NULL){
+RunRobPCA <- function(object, npcs=10, pc.genes=NULL, use.modified.pcscores=TRUE){
 
   print('Running rPCA')
   if(is.null(pc.genes)){
@@ -71,8 +91,12 @@ RunRobPCA <- function(object, npcs=10, pc.genes=NULL){
   mat.for.pca <- t(as.matrix(object@data[pc.genes, ]))
   output <- do.robpca(mat.for.pca, ncp = npcs)
 
-  print('Calculating modified PCs')
-  pc.sigs <- CalcModifiedPCscores(object = object, loadings = output[[2]], num.sig.genes = 30)
+  if(use.modified.pcscores){
+    print('Calculating modified PCs')
+    pc.sigs <- CalcModifiedPCscores(object = object, loadings = output[[2]], num.sig.genes = 30)
+  } else{
+    pc.sigs <- output[[2]]
+  }
 
 
   reduction.name = 'rpca'
@@ -95,19 +119,24 @@ RunRobPCA <- function(object, npcs=10, pc.genes=NULL){
 
 #
   print('Adding modified PCs to Seurat object')
-  object <- SetDimReduction(object, 'rpca', 'cell.embeddings', new.data = pc.sigs)
+  object <- Seurat::SetDimReduction(object, 'rpca', 'cell.embeddings', new.data = pc.sigs)
 
   print('Adding rPCA loadings to Seurat object')
-  object <- SetDimReduction(object, 'rpca', 'gene.loadings', new.data = as.matrix(output[[2]]))
+  object <- Seurat::SetDimReduction(object, 'rpca', 'gene.loadings', new.data = as.matrix(output[[2]]))
 
-  object <- SetDimReduction(object, 'rpca', 'key', new.data = 'PC')
+  object <- Seurat::SetDimReduction(object, 'rpca', 'key', new.data = 'PC')
 
   return(object)
 }
 
+#' Plot the results of rPCA with cells colored by their identity class.
+#'
+#' @param object Seurat object
+#' @param ... Additional parameters to DimPlot; for example, which dimensions to
+#'   plot.
 #' @export
-RPCAPlot <- function(object){
-  object <- SetDimReduction(object, 'pca','cell.embeddings',
-                            new.data = GetDimReduction(object=object, reduction.type = 'rpca',slot = 'cell.embeddings'))
-  PCAPlot(object)
+RPCAPlot <- function(object,...){
+  object <- Seurat::SetDimReduction(object, 'pca','cell.embeddings',
+                            new.data = Seurat::GetDimReduction(object=object, reduction.type = 'rpca',slot = 'cell.embeddings'))
+  Seurat::PCAPlot(object = object)
 }
