@@ -1,0 +1,50 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# scRobustPCA
+
+Performs robust PCA with modified PCs on Seurat objects for scRNA-Seq dimensionality reduction.
+
+## Installation
+
+You can install scRobustPCA from github with:
+
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("gmstanle/scRobustPCA")
+```
+
+## Calculate rPCA
+```{r example}
+pcs.use=1:10
+seurat_object <- FindVariableGenes(seurat_object, do.plot = F)
+seurat_object <- RunRobPCA(seurat_object, npcs=max(pcs.use))
+```
+
+## Plot pairwise combinations of PCs
+```{r}
+pairs(GetDimReduction(seurat_object, reduction.type = 'rpca'))
+```
+
+## Calculate TSNE
+```{r}
+seurat_object <- RunTSNE(seurat_object, reduction.type = 'rpca', dims.use = pcs.use)
+```
+
+## Cluster cells
+```{r}
+seurat_object <- FindClusters(seurat_object, reduction.type = 'rpca', dims.use = pcs.use)
+```
+
+
