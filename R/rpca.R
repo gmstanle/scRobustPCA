@@ -93,10 +93,6 @@ RunRobPCA <- function(object, npcs=10, pc.genes=NULL, use.modified.pcscores=TRUE
 
   output <- do.robpca(mat.for.pca, ncp = npcs)
 
-  # print(rownames(output[[1]]))
-  print(colnames(output[[1]]))
-  print(colnames(output[[2]]))
-  # print(rownames(output[[2]]))
   if(use.modified.pcscores){
     print('Calculating modified PCs')
     pc.sigs <- CalcModifiedPCscores(object = object, loadings = output[[2]], num.sig.genes = 30)
