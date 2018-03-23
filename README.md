@@ -66,7 +66,7 @@ pbmc_small <- RunTSNE(pbmc_small, reduction.use = 'rpca', dims.use = pcs.use,per
 Cluster cells
 -------------
 
-Note: need to set the dims.use parameter or `FindClusters` seems to default to using `'pca'` dimensionality reduction.
+Note: need to set `dims.use = pcs.use` parameter or `FindClusters` seems to default to using `'pca'` dimensionality reduction.
 
 ``` r
 
