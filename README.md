@@ -66,8 +66,11 @@ pbmc_small <- RunTSNE(pbmc_small, reduction.use = 'rpca', dims.use = pcs.use,per
 Cluster cells
 -------------
 
+Note: need to set the dims.use parameter or `FindClusters` seems to default to using `'pca'` dimensionality reduction.
+
 ``` r
-pbmc_small <- FindClusters(pbmc_small, reduction.type = 'rpca', print.output = F)
+
+pbmc_small <- FindClusters(pbmc_small, reduction.type = 'rpca', dims.use = pcs.use, print.output = F)
 TSNEPlot(pbmc_small)
 ```
 
