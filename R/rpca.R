@@ -4,17 +4,17 @@
 #' This function performs the variant of robust PCA developed by Mia Hubert et al. on a
 #' matrix of counts
 #'
-#' @param data Log-transformed gene expression counts
+#' @param data Log-transformed gene expression counts, rows = samples; columns = features (genes)
 #' @return A list containing the output of PcaHubert, the (default) PC scores, and the PC loadings
 do.robpca <- function(data, ncp=10,...){
-    pca <- rrcov::PcaHubert(data, k = ncp,kmax=ncp)
+    pca <- rrcov::PcaHubert(data, k = ncp)
 
     scores <- as.data.frame(rrcov::getScores(pca))
     scores$cell.name <- rownames(scores)
 
     rpca.loadings <- as.data.frame(rrcov::getLoadings(pca))
-
     eigenvalues = rrcov::getEigenvalues(pca)
+
     list(scores, rpca.loadings, eigenvalues)
 }
 
@@ -85,22 +85,27 @@ RunRobPCA <- function(object, npcs=10, pc.genes=NULL, use.modified.pcscores=TRUE
   if(is.null(pc.genes)){
     pc.genes = object@var.genes
   } else{
+    print("Variable genes not found. Using all genes in dataset.")
     pc.genes = rownames(object@data)
   }
 
   mat.for.pca <- t(as.matrix(object@data[pc.genes, ]))
+
   output <- do.robpca(mat.for.pca, ncp = npcs)
 
+  # print(rownames(output[[1]]))
+  print(colnames(output[[1]]))
+  print(colnames(output[[2]]))
+  # print(rownames(output[[2]]))
   if(use.modified.pcscores){
     print('Calculating modified PCs')
     pc.sigs <- CalcModifiedPCscores(object = object, loadings = output[[2]], num.sig.genes = 30)
   } else{
-    pc.sigs <- output[[2]]
+    pc.sigs <- as.matrix(output[[1]])
   }
 
 
   reduction.name = 'rpca'
-
   gene.loadings = as.matrix(output[[2]])
   cell.embeddings = pc.sigs
   reduction.key = 'PC'

@@ -25,26 +25,35 @@ You can install scRobustPCA from github with:
 devtools::install_github("gmstanle/scRobustPCA")
 ```
 
+# Working example on 80 PBMCs
+Intended only to demonstrate a functional workflow.
+`pbmc_small` is a subsetted dataset with 80 cells and 230 genes 
+included in the `Seurat` package.
+
+
 ## Calculate rPCA
 ```{r example}
-pcs.use=1:10
-seurat_object <- FindVariableGenes(seurat_object, do.plot = F)
-seurat_object <- RunRobPCA(seurat_object, npcs=max(pcs.use))
+require(Seurat)
+require(scRobustPCA)
+pcs.use=1:5
+pbmc_small <- FindVariableGenes(pbmc_small, do.plot = F) # optional
+pbmc_small <- RunRobPCA(pbmc_small, npcs=max(pcs.use), use.modified.pcscores = T)
 ```
 
 ## Plot pairwise combinations of PCs
 ```{r}
-pairs(GetDimReduction(seurat_object, reduction.type = 'rpca'))
+pairs(GetCellEmbeddings(pbmc_small, reduction.type = 'rpca'))
 ```
 
 ## Calculate TSNE
 ```{r}
-seurat_object <- RunTSNE(seurat_object, reduction.type = 'rpca', dims.use = pcs.use)
+pbmc_small <- RunTSNE(pbmc_small, reduction.use = 'rpca', dims.use = pcs.use,perplexity=10)
 ```
 
 ## Cluster cells
 ```{r}
-seurat_object <- FindClusters(seurat_object, reduction.type = 'rpca', dims.use = pcs.use)
+pbmc_small <- FindClusters(pbmc_small, reduction.type = 'rpca', print.output = F)
+TSNEPlot(pbmc_small)
 ```
 
 
