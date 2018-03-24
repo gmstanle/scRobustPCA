@@ -9,13 +9,13 @@
 do.robpca <- function(data, ncp=10,...){
     pca <- rrcov::PcaHubert(data, k = ncp)
 
-    scores <- as.data.frame(rrcov::getScores(pca))
-    scores$cell.name <- rownames(scores)
+    scores <- rrcov::getScores(pca)
 
     rpca.loadings <- as.data.frame(rrcov::getLoadings(pca))
     eigenvalues = rrcov::getEigenvalues(pca)
 
-    list(scores, rpca.loadings, eigenvalues)
+    return(list(scores=scores, loadings=rpca.loadings, eig=eigenvalues))
+
 }
 
 
@@ -95,14 +95,14 @@ RunRobPCA <- function(object, npcs=10, pc.genes=NULL, use.modified.pcscores=TRUE
 
   if(use.modified.pcscores){
     print('Calculating modified PCs')
-    pc.sigs <- CalcModifiedPCscores(object = object, loadings = output[[2]], num.sig.genes = 30)
+    pc.sigs <- CalcModifiedPCscores(object = object, loadings = output$loadings, num.sig.genes = 30)
   } else{
-    pc.sigs <- as.matrix(output[[1]])
+    pc.sigs <- output$scores
   }
 
 
   reduction.name = 'rpca'
-  gene.loadings = as.matrix(output[[2]])
+  gene.loadings = as.matrix(output$loadings)
   cell.embeddings = pc.sigs
   reduction.key = 'PC'
   sdev=numeric(0)
