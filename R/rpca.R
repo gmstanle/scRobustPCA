@@ -7,7 +7,7 @@
 #' @param data Log-transformed gene expression counts, rows = samples; columns = features (genes)
 #' @return A list containing the output of PcaHubert, the (default) PC scores, and the PC loadings
 do.robpca <- function(data, ncp=10,...){
-    pca <- rrcov::PcaHubert(data, k = ncp)
+    pca <- rrcov::PcaHubert(data, kmax = ncp, k=ncp)
 
     scores <- rrcov::getScores(pca)
 
